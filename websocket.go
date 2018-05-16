@@ -13,6 +13,7 @@ import (
 )
 
 const wsURL = "wss://www.bitmex.com/realtime"
+const wsTestURL = "wss://testnet.bitmex.com/realtime"
 
 //WS - websocket connection object
 type WS struct {
@@ -55,6 +56,23 @@ func (ws *WS) Connect() error {
 	}
 
 	log.Info("Connected")
+
+	ws.conn = conn
+
+	go ws.read()
+
+	return nil
+}
+
+//ConnectTest - connects testnet
+func (ws *WS) ConnectTest() error {
+	conn, err := websocket.Dial(wsTestURL, "", "http://localhost/")
+
+	if err != nil {
+		return err
+	}
+
+	log.Info("Connected Testnet")
 
 	ws.conn = conn
 
