@@ -3,6 +3,8 @@ package bitmex
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -37,20 +39,13 @@ type WS struct {
 
 //NewWS - creates new websocket object
 func NewWS() *WS {
-	return &WS{
-		nonce:      time.Now().UnixNano() / int64(time.Millisecond),
-		quit:       make(chan struct{}),
-		chTrade:    make(map[chan WSTrade][]Contract, 0),
-		chQuote:    make(map[chan WSQuote][]Contract, 0),
-		chOrder:    make(map[chan Order][]Contract, 0),
-		chPosition: make(map[chan WSPosition][]Contract, 0),
-		chSucc:     make(map[string][]chan struct{}, 0),
-		url:        wsURL,
+	var _url string
+	if b, _ := strconv.ParseBool(os.Getenv("BITMEX_TESTNET")); !b {
+		_url = wsURL
+	} else {
+		_url = wsTestURL
 	}
-}
 
-//NewTestWS - creates new websocket object
-func NewTestWS() *WS {
 	return &WS{
 		nonce:      time.Now().UnixNano() / int64(time.Millisecond),
 		quit:       make(chan struct{}),
@@ -59,7 +54,7 @@ func NewTestWS() *WS {
 		chOrder:    make(map[chan Order][]Contract, 0),
 		chPosition: make(map[chan WSPosition][]Contract, 0),
 		chSucc:     make(map[string][]chan struct{}, 0),
-		url:        wsTestURL,
+		url:        _url,
 	}
 }
 
