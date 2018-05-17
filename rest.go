@@ -50,7 +50,7 @@ func NewREST() *REST {
 	}
 }
 
-// Auth func
+//Auth func
 func (r *REST) Auth(key, secret string) {
 	r.key, r.secret = key, secret
 }
@@ -73,11 +73,6 @@ func (r *REST) getNonce() int64 {
 }
 
 func (r *REST) request(method, url string, body []byte) (*http.Request, error) {
-
-	if method == "GET" {
-		// TODO
-		return nil, nil
-	}
 	req, err := http.NewRequest(
 		method, r.endpoint+apiVersion+url, bytes.NewReader(body),
 	)
