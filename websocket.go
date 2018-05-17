@@ -25,6 +25,7 @@ type WS struct {
 	secret string
 	chSucc map[string][]chan struct{}
 	quit   chan struct{}
+	url    string
 
 	// channels subscribed to different contracts
 
@@ -44,35 +45,33 @@ func NewWS() *WS {
 		chOrder:    make(map[chan Order][]Contract, 0),
 		chPosition: make(map[chan WSPosition][]Contract, 0),
 		chSucc:     make(map[string][]chan struct{}, 0),
+		url:        wsURL,
+	}
+}
+
+//NewTestWS - creates new websocket object
+func NewTestWS() *WS {
+	return &WS{
+		nonce:      time.Now().UnixNano() / int64(time.Millisecond),
+		quit:       make(chan struct{}),
+		chTrade:    make(map[chan WSTrade][]Contract, 0),
+		chQuote:    make(map[chan WSQuote][]Contract, 0),
+		chOrder:    make(map[chan Order][]Contract, 0),
+		chPosition: make(map[chan WSPosition][]Contract, 0),
+		chSucc:     make(map[string][]chan struct{}, 0),
+		url:        wsTestURL,
 	}
 }
 
 //Connect - connects
 func (ws *WS) Connect() error {
-	conn, err := websocket.Dial(wsURL, "", "http://localhost/")
+	conn, err := websocket.Dial(ws.url, "", "http://localhost/")
 
 	if err != nil {
 		return err
 	}
 
 	log.Info("Connected")
-
-	ws.conn = conn
-
-	go ws.read()
-
-	return nil
-}
-
-//ConnectTest - connects testnet
-func (ws *WS) ConnectTest() error {
-	conn, err := websocket.Dial(wsTestURL, "", "http://localhost/")
-
-	if err != nil {
-		return err
-	}
-
-	log.Info("Connected Testnet")
 
 	ws.conn = conn
 

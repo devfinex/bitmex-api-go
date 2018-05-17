@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	endpoint   = "https://www.bitmex.com"
-	apiVersion = "/api/v1"
+	endpoint     = "https://www.bitmex.com"
+	testEndpoint = "https://testnet.bitmex.com"
+	apiVersion   = "/api/v1"
 )
 
 // REST API object
@@ -23,6 +24,7 @@ type REST struct {
 	client      *http.Client
 	key, secret string
 	nonce       int64
+	endpoint    string
 }
 
 //NewREST REST Bitmex object
@@ -32,11 +34,19 @@ func NewREST() *REST {
 		IdleConnTimeout: 60 * time.Second,
 	}
 
+	var _endpoint string
+	if b, _ := strconv.ParseBool(os.Getenv("BITMEX_TESTNET")); !b {
+		_endpoint = endpoint
+	} else {
+		_endpoint = testEndpoint
+	}
+
 	return &REST{
-		client: &http.Client{Transport: tr},
-		key:    os.Getenv("BITMEX_KEY"),
-		secret: os.Getenv("BITMEX_SECRET"),
-		nonce:  time.Now().UnixNano() / int64(time.Millisecond),
+		client:   &http.Client{Transport: tr},
+		key:      os.Getenv("BITMEX_KEY"),
+		secret:   os.Getenv("BITMEX_SECRET"),
+		nonce:    time.Now().UnixNano() / int64(time.Millisecond),
+		endpoint: _endpoint,
 	}
 }
 
@@ -69,7 +79,7 @@ func (r *REST) request(method, url string, body []byte) (*http.Request, error) {
 		return nil, nil
 	}
 	req, err := http.NewRequest(
-		method, endpoint+apiVersion+url, bytes.NewReader(body),
+		method, r.endpoint+apiVersion+url, bytes.NewReader(body),
 	)
 
 	if err != nil {
